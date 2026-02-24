@@ -1,98 +1,87 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## ATTENSION! this part of work wos made by AI!
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Структура проекту
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Проект організовано за принципами модульності NestJS:
 
-## Description
+- **src/** — основна папка з вихідним кодом
+  - **main.ts** — точка входу в застосунок
+  - **app.module.ts** — кореневий модуль
+  - **db/** — сутності бази даних
+    - **entity/group.entity.ts** — опис групи
+    - **entity/student.entity.ts** — опис студента
+  - **exception/** — обробка помилок
+    - **error.exception.ts** — кастомні винятки
+  - **external/** — інтеграція із зовнішніми сервісами
+    - **external.controller.ts**, **external.service.ts**, **external.module.ts**
+    - **interface/product.interface.ts** — інтерфейси зовнішніх продуктів
+  - **groups/** — логіка для груп
+    - **groups.controller.ts**, **groups.service.ts**, **groups.repository.ts**, **groups.module.ts**
+    - **dto/** — DTO для груп (addStudent, createGroup, groupIdParam)
+  - **students/** — логіка для студентів
+    - **students.controller.ts**, **students.service.ts**, **students.repository.ts**, **students.module.ts**
+    - **dto/** — DTO для студентів (createStudent, studentIdParam)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **package.json** — залежності та скрипти
+- **tsconfig.json** — налаштування TypeScript
+- **eslint.config.mjs** — налаштування ESLint
 
-## Project setup
+Кожен модуль містить контролери, сервіси, DTO та репозиторії для ізоляції бізнес-логіки.
 
-```bash
-$ npm install
+## Реалізація інтеграції із зовнішніми сервісами
+
+Інтеграція із зовнішніми API реалізована у модулі `external`:
+
+- **ExternalService** використовує `HttpService` для HTTP-запитів до зовнішнього ресурсу (URL зберігається у змінних оточення через `ConfigService`).
+- Для підвищення надійності дані кешуються через `CacheManager`. Якщо зовнішній сервіс недоступний, повертаються дані з кешу.
+- **ExternalController** надає endpoint `/external`, який повертає дані із зовнішнього API або кешу.
+- Модуль `ExternalModule` підключає `HttpModule`, `CacheModule` та `ConfigModule` для роботи із HTTP, кешем та конфігурацією.
+
+**Переваги підходу:**
+
+- Відмова зовнішнього сервісу не призводить до повної втрати функціоналу — дані повертаються з кешу.
+- Гнучке налаштування через змінні оточення (`EXTERNAL_URL`, `CACHE_TTL`).
+- Можливість легко додати кешування на рівні контролера через `@UseInterceptors(CacheInterceptor)`.
+
+## Опис кешування
+
+У проекті використовується кешування для підвищення надійності та продуктивності при роботі із зовнішніми API:
+
+- Підключено `CacheModule` з асинхронною конфігурацією (TTL задається через змінну оточення `CACHE_TTL`, за замовчуванням 300 секунд).
+- Кешування реалізовано у сервісі `ExternalService` через `CacheManager` — дані зберігаються у кеші після успішного запиту до зовнішнього API.
+- Якщо зовнішній сервіс недоступний, дані повертаються з кешу (ключ `externalData`).
+- Кешування можна легко розширити на рівень контролера за допомогою декоратора `@UseInterceptors(CacheInterceptor)` при зміні деяких умов ТЗ!.
+- Кеш є глобальним для всього застосунку (isGlobal: true).
+
+**Налаштування:**
+У файлі `.env` потрібно вказати TTL кешу (у секундах):
+
+```
+CACHE_TTL=300
 ```
 
-## Compile and run the project
+## Інструкція запуску
+
+1. Скопіюйте `.env.example` у `.env` та вкажіть необхідні змінні (наприклад, `EXTERNAL_URL`, `CACHE_TTL`, параметри БД тощо).
+2. Встановіть залежності:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+3. Запустіть застосунок у потрібному режимі:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start         # звичайний запуск
+npm run start:dev     # режим розробки з hot-reload
+npm run start:prod    # production-режим
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+4. Для тестування використовуйте:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run test          # юніт-тести
+
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---

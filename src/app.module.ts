@@ -5,6 +5,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { GroupsModule } from './groups/groups.module';
 import { StudentsModule } from './students/students.module';
 import { ExternalModule } from './external/external.module';
+import { ErrorException } from './exception/error.exception';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ExternalModule } from './external/external.module';
   controllers: [],
   providers: [
     { provide: 'APP_PIPE', useValue: new ValidationPipe({ whitelist: true }) },
+    { provide: 'APP_FILTER', useClass: ErrorException },
   ],
 })
 export class AppModule {}

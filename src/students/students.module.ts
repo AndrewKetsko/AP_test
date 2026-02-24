@@ -9,5 +9,6 @@ import { Student } from 'src/db/entity/student.entity';
   imports: [TypeOrmModule.forFeature([Student])],
   controllers: [StudentsController],
   providers: [StudentsService, StudentsRepository],
+  exports: [StudentsService],
 })
 export class StudentsModule {}
