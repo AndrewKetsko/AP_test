@@ -6,7 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { lastValueFrom, map } from 'rxjs';
+import { catchError, lastValueFrom, map, throwError, timeout } from 'rxjs';
 import { ProductInterface } from './interface/product.interface';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
@@ -28,6 +28,11 @@ export class ExternalService {
             ProductInterface[]
           >(this.configService.get<string>('EXTERNAL_URL')!)
           .pipe(
+            timeout(300),
+            catchError((error) => {
+              console.error('Error fetching external data:', error);
+              return throwError(() => new Error(error.message));
+            }),
             map((response) =>
               response.data.map(({ id, title, price }) => ({
                 id,
