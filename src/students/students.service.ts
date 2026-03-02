@@ -34,7 +34,7 @@ export class StudentsService {
     try {
       student = await this.studentsRepository.createStudent(createStudentDto);
     } catch (error) {
-      if ((error.code = '23505')) {
+      if ((error.code === '23505')) {
         throw new ConflictException(
           'Student with the same email already exists',
         );

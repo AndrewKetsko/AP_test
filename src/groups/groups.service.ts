@@ -56,7 +56,7 @@ export class GroupsService {
     try {
       group = await this.groupsRepository.createGroup(createGroupDto);
     } catch (error) {
-      if ((error.code = '23505')) {
+      if ((error.code === '23505')) {
         throw new ConflictException(
           `Group with name ${createGroupDto.name} already exists`,
         );
